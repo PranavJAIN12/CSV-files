@@ -1,42 +1,78 @@
-import '../App.css'
+import '../App.css';
+import Papa from 'papaparse';
+import { useState } from 'react';
 
 const Home = () => {
-  return (
-    <div className="app">
-    <h2>CSV File Editor</h2>
+  const [data, setData] = useState([]);
+  const [headers, setHeaders] = useState([]);
+  const [isFileUploaded, setIsFileUploaded] = useState(false);
+
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0];
     
-    {/* File Upload */}
-    <input type="file" accept=".csv" />
+    if (!file) {
+      console.error("No file selected");
+      return;
+    }
 
-    {/* Table to display CSV content */}
-    <div className="table-container">
-      <table>
-        <thead>
-          <tr>
-            <th>Header 1</th>
-            <th>Header 2</th>
-            <th>Header 3</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Row 1, Col 1</td>
-            <td>Row 1, Col 2</td>
-            <td>Row 1, Col 3</td>
-          </tr>
-          <tr>
-            <td>Row 2, Col 1</td>
-            <td>Row 2, Col 2</td>
-            <td>Row 2, Col 3</td>
-          </tr>
-        </tbody>
-      </table>
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (result) => {
+        console.log("Parsed result:", result);
+
+        if (result.errors.length) {
+          console.error("Error parsing CSV:", result.errors);
+          return;
+        }
+        
+        if (result.data && result.data.length > 0) {
+          setData(result.data);
+          setHeaders(Object.keys(result.data[0]));
+          setIsFileUploaded(true);
+        } else {
+          console.error("CSV file is empty or has incorrect data");
+        }
+      },
+      error: (error) => {
+        console.error("Parsing error:", error.message);
+      },
+    });
+  };
+
+  return (
+    <div className="App">
+      <h2>CSV File Editor</h2>
+      <input type="file" accept=".csv" onChange={handleFileUpload} />
+      {isFileUploaded && (
+        <div>
+          <table border="1">
+            <thead>
+              <tr>
+                {headers.map((header) => (
+                  <th key={header}>{header}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((row, rowIndex) => (
+                <tr key={rowIndex}>
+                  {headers.map((column) => (
+                    <td key={column}>
+                      <input
+                        value={row[column] || ""}
+                        readOnly // Suppresses warning by making the field read-only
+                      />
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
-
-    {/* Download Button */}
-    <button>Download CSV</button>
-  </div>
-  )
+  );
 }
 
-export default Home
+export default Home;
