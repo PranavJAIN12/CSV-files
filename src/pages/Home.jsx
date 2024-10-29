@@ -1,6 +1,7 @@
 import '../App.css';
 import Papa from 'papaparse';
 import { useState } from 'react';
+import { saveAs } from 'file-saver';
 
 const Home = () => {
   const [data, setData] = useState([]);
@@ -40,6 +41,21 @@ const Home = () => {
     });
   };
 
+  const handleCellChange = (rowIndex, column, value) => {
+    const updatedData = [...data];
+    updatedData[rowIndex] = {
+      ...updatedData[rowIndex],
+      [column]: value,
+    };
+    setData(updatedData);
+  };
+
+  const handleSave = () => {
+    const csv = Papa.unparse(data);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    saveAs(blob, 'edited_data.csv');
+  };
+
   return (
     <div className="App">
       <h2>CSV File Editor</h2>
@@ -61,7 +77,9 @@ const Home = () => {
                     <td key={column}>
                       <input
                         value={row[column] || ""}
-                        readOnly // Suppresses warning by making the field read-only
+                        onChange={(e) =>
+                          handleCellChange(rowIndex, column, e.target.value)
+                        }
                       />
                     </td>
                   ))}
@@ -69,6 +87,7 @@ const Home = () => {
               ))}
             </tbody>
           </table>
+          <button onClick={handleSave}>Save CSV</button>
         </div>
       )}
     </div>
