@@ -51,9 +51,9 @@ const Home = () => {
   };
 
   const handleSave = () => {
-    const csv = Papa.unparse(data);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    saveAs(blob, 'edited_data.csv');
+    const csv = Papa.unparse(data); // Convert JSON back to CSV
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); // Create a Blob
+    saveAs(blob, 'edited_data.csv'); // Trigger the download
   };
 
   return (
@@ -87,7 +87,7 @@ const Home = () => {
               ))}
             </tbody>
           </table>
-          <button onClick={handleSave}>Save CSV</button>
+          <button onClick={handleSave}>Save CSV</button> 
         </div>
       )}
     </div>
